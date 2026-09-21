@@ -76,6 +76,7 @@ function x({ on: e, disabled: t, color: n, children: r, click: i }) {
 function ee() {
   const [route, setRoute] = f.useState(location.hash);
   const method = route.startsWith("#/methodology");
+
   f.useEffect(() => {
     const update = () => {
       setRoute(location.hash);
@@ -99,6 +100,17 @@ function ee() {
     [u, d] = (0, f.useState)(null),
     [ee, w] = (0, f.useState)(5),
     ie = (0, f.useRef)(null);
+  f.useEffect(() => {
+    if (!e) return;
+    s((previous) => ({
+      ...previous,
+      contests: [
+        ...new Set(
+          previous.contests.map((id) => e.contest_group_by_id[id] || id),
+        ),
+      ],
+    }));
+  }, [e]);
   ((0, f.useEffect)(() => {
     fetch(`./data/leaders.json`)
       .then((e) => {
@@ -369,13 +381,6 @@ function ee() {
           children: [
             (0, p.jsxs)(`div`, {
               children: [
-                (0, p.jsxs)(`div`, {
-                  className: `brand`,
-                  children: [
-                    (0, p.jsx)(`b`, { children: `Делай-саммит` }),
-                    (0, p.jsx)(`span`, { children: `Карта для организаторов` }),
-                  ],
-                }),
                 (0, p.jsx)(`h1`, { children: D.dataset_title }),
                 (0, p.jsx)(`p`, {
                   children: `Люди, опыт и практики для работы с сообществами. Найдите ведущего, эксперта или руководителя проекта в восьми регионах.`,
@@ -397,8 +402,8 @@ function ee() {
               ],
             }),
             (0, p.jsx)(`img`, {
-              src: `./assets/project-logo.svg`,
-              alt: `Делай-саммит — ресурсный альянс НКО: практика совместных действий`,
+              src: `./assets/background.jpg`,
+              alt: `Иллюстрация проекта: лампочки`,
             }),
           ],
         }),
@@ -553,7 +558,7 @@ function ee() {
                             ),
                           ),
                           (0, p.jsx)(ContestFilter, {
-                            contests: e.fund_contests,
+                            contests: e.fund_contest_groups,
                             selected: o.contests,
                             toggle: (id) => le(`contests`, id),
                             count: (id) => ce(`contests`, id),
@@ -691,11 +696,6 @@ function ee() {
                           (0, p.jsx)(C, {
                             over: `Подборка`,
                             title: `${se.length} проверенных профилей`,
-                          }),
-                          (0, p.jsx)(`a`, {
-                            href: `./data/leaders_map_updated.xlsx`,
-                            download: !0,
-                            children: `Скачать данные`,
                           }),
                         ],
                       }),
@@ -1083,6 +1083,50 @@ function prepareFundData(data) {
   const contests = new Map(
     data.fund_contests.map((contest) => [contest.contest_id, contest]),
   );
+  const families = [
+    ["ACTION", "Время действовать"],
+    ["SPORT", "Добрый спорт"],
+    ["ATTENTION", "Сила внимания"],
+    ["OPPORTUNITIES", "Среда возможностей"],
+    ["FAMILY", "Туда, где семья"],
+    ["WARMTH", "Территории тепла"],
+  ];
+  data.contest_group_by_id = {};
+  data.fund_contest_groups = families
+    .map(([key, name]) => {
+      const members = data.fund_contests.filter((c) =>
+        c.contest_name.toLowerCase().includes(name.toLowerCase()),
+      );
+      const ids = new Set(members.map((c) => c.contest_id));
+      const groupId = "TC_GROUP_" + key;
+      members.forEach(
+        (c) => (data.contest_group_by_id[c.contest_id] = groupId),
+      );
+      const years = [
+        ...new Set(
+          members
+            .flatMap((c) => [
+              c.competition_year,
+              ...(c.contest_name.match(/20\d{2}/g) || []),
+            ])
+            .filter(Boolean)
+            .map(Number),
+        ),
+      ].sort((a, b) => a - b);
+      return {
+        contest_id: groupId,
+        contest_name: name,
+        period: years.length
+          ? years[0] === years.at(-1)
+            ? String(years[0])
+            : years[0] + "–" + years.at(-1)
+          : "",
+        project_count: data.fund_projects.filter((project) =>
+          ids.has(project.contest_id),
+        ).length,
+      };
+    })
+    .filter((group) => group.project_count);
   const byPerson = new Map();
   for (const link of data.person_fund_projects) {
     const project = projects.get(link.project_id);
@@ -1106,7 +1150,13 @@ function prepareFundData(data) {
       role_ids: [...roles].join(";"),
       fund_projects: linked,
       fund_contest_ids: [
-        ...new Set(linked.map((project) => project.contest_id)),
+        ...new Set(
+          linked.map(
+            (project) =>
+              data.contest_group_by_id[project.contest_id] ||
+              project.contest_id,
+          ),
+        ),
       ],
     };
   });
@@ -1114,35 +1164,18 @@ function prepareFundData(data) {
 }
 
 function ContestFilter({ contests, selected, toggle, count }) {
-  const [query, setQuery] = f.useState("");
-  const sorted = [...contests].sort((a, b) =>
-    a.contest_name.localeCompare(b.contest_name, "ru"),
-  );
-  const visible = sorted.filter((item) =>
-    v(item.contest_name).includes(v(query)),
-  );
   return p.jsxs("section", {
-    className: "contest-filter",
+    className: "checkgroup contest-filter",
     children: [
-      p.jsx("h3", { children: "Победители конкурсов фонда Тимченко" }),
-      p.jsx("input", {
-        type: "search",
-        className: "contest-search",
-        "aria-label": "Поиск конкурса",
-        placeholder: "Найти конкурс по названию или году",
-        value: query,
-        onChange: (event) => setQuery(event.target.value),
-      }),
+      p.jsx("b", { children: "Победители конкурсов фонда Тимченко" }),
       p.jsx("p", {
         className: "contest-hint",
-        children:
-          "Можно выбрать несколько конкурсов. Показаны руководители хотя бы одного из выбранных конкурсов.",
+        children: "В скобках — число проектов в реестре",
       }),
       p.jsx("div", {
         className: "contest-options",
-        children: visible.map((item) => {
-          const total = count(item.contest_id),
-            checked = selected.includes(item.contest_id);
+        children: contests.map((item) => {
+          const checked = selected.includes(item.contest_id);
           return p.jsxs(
             "label",
             {
@@ -1150,26 +1183,18 @@ function ContestFilter({ contests, selected, toggle, count }) {
                 p.jsx("input", {
                   type: "checkbox",
                   checked,
-                  disabled: !total && !checked,
+                  disabled: !count(item.contest_id) && !checked,
                   onChange: () => toggle(item.contest_id),
                 }),
-                p.jsx("span", { children: item.contest_name }),
-                p.jsx("small", { children: total }),
+                p.jsx("span", {
+                  children: `«${item.contest_name}» (${item.period}) (${item.project_count})`,
+                }),
               ],
             },
             item.contest_id,
           );
         }),
       }),
-      !visible.length &&
-        p.jsx("p", {
-          children: "Конкурсы не найдены. Измените поисковый запрос.",
-        }),
-      !!selected.length &&
-        p.jsx("p", {
-          className: "contest-hint",
-          children: `Выбрано конкурсов: ${selected.length}`,
-        }),
     ],
   });
 }

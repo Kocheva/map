@@ -421,3 +421,170 @@ h4 {
     transition: none !important;
   }
 }
+/* Общая стилистика с Библиотекой организатора, 21.09.2026 */
+:root {
+  --red: #ed124c;
+  --ink: #101b36;
+  --muted: #64748b;
+  --line: #d6e1ec;
+  --brand-steel: #71809a;
+}
+body,
+h1,
+h2,
+h3,
+h4 {
+  font-family: "Segoe UI", Arial, sans-serif;
+}
+.project-nav {
+  max-width: none;
+  padding: 24px max(24px, calc((100vw - 1392px) / 2));
+  border-bottom: 1px solid var(--line);
+}
+.project-home {
+  flex-direction: row;
+  align-items: center;
+  gap: 20px;
+  font-size: 18px;
+}
+.project-home b {
+  background: var(--red);
+  color: #fff;
+  text-transform: uppercase;
+  border-radius: 999px;
+  padding: 14px 24px;
+  font-size: 17px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+.project-home span {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--muted);
+}
+.hero {
+  background: #fff;
+  grid-template-columns: minmax(0, 1.2fr) minmax(280px, 0.8fr);
+  padding-top: 45px;
+  padding-bottom: 45px;
+}
+.hero img {
+  height: 290px;
+  object-fit: contain;
+  object-position: center;
+}
+.hero h1 {
+  font-weight: 600;
+  line-height: 1.08;
+}
+.hero p {
+  font-size: 19px;
+}
+.meta span:first-child {
+  background: var(--soft);
+  border-color: var(--line);
+}
+.grany-link {
+  display: block;
+  margin-top: 14px;
+}
+.extras {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 0.8fr) minmax(
+      0,
+      0.8fr
+    ) minmax(0, 1.4fr);
+  align-items: stretch;
+}
+.extras > .checkgroup {
+  max-height: 250px;
+  min-height: 230px;
+}
+.contest-filter {
+  grid-column: auto;
+  overflow: auto;
+}
+.contest-filter > b {
+  line-height: 1.45;
+  display: block;
+}
+.contest-filter .contest-hint {
+  font-size: 11px;
+  line-height: 1.35;
+  margin: 6px 0 10px;
+}
+.contest-options {
+  display: flex;
+  flex-direction: column;
+  max-height: none;
+  overflow: visible;
+  gap: 9px;
+  margin: 0;
+  padding: 0;
+}
+.contest-options label {
+  font-size: 12px;
+  line-height: 1.5;
+  gap: 7px;
+}
+.contest-options input {
+  flex: 0 0 auto;
+}
+.inter {
+  grid-column: 1/-1;
+}
+@media (max-width: 1100px) {
+  .extras {
+    grid-template-columns: 1fr 1fr;
+  }
+  .extras > .checkgroup {
+    min-height: 225px;
+    max-height: 250px;
+  }
+}
+@media (max-width: 740px) {
+  .project-nav {
+    padding: 18px;
+  }
+  .project-home {
+    gap: 12px;
+  }
+  .project-home b {
+    padding: 11px 17px;
+    font-size: 14px;
+  }
+  .project-home span {
+    font-size: 14px;
+  }
+  .hero {
+    display: block;
+    padding: 28px 18px;
+  }
+  .hero img {
+    height: 185px;
+    margin-top: 20px;
+  }
+  .hero h1 {
+    font-size: 38px;
+  }
+  .hero p {
+    font-size: 17px;
+  }
+  .extras {
+    grid-template-columns: 1fr;
+  }
+  .extras > .checkgroup {
+    min-height: 0;
+    max-height: 225px;
+  }
+  .extras > .contest-filter {
+    max-height: none;
+  }
+  .contest-options label {
+    font-size: 14px;
+  }
+  .project-links {
+    font-size: 13px;
+  }
+}
+.checkgroup.contest-filter .contest-options{gap:6px}
+.checkgroup.contest-filter .contest-options label{padding:2px 0}
